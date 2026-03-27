@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nova Channel Sales — Daily Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    :root {
+      --p1: #1a237e; --p2: #283593; --p3: #3949ab;
+      --a1: #ff6f00; --a2: #ff8f00; --a3: #ffa726;
+      --g1: #00897b; --g2: #26a69a;
+      --bg: #eef1fb;
+      --card: #ffffff;
+      --border: #e0e6f5;
+      --text: #0f1733;
+      --muted: #7b8ab8;
+      --light: #f4f6ff;
+      --radius: 16px;
+      --shadow-sm: 0 2px 12px rgba(26,35,126,0.07);
+      --shadow: 0 8px 32px rgba(26,35,126,0.12);
+      --shadow-lg: 0 20px 60px rgba(26,35,126,0.18);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    /* ══════════════════ HEADER ══════════════════ */
+    .header {
+      background: linear-gradient(135deg, #0d1b6e 0%, #1a237e 40%, #1565c0 80%, #1976d2 100%);
+      position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 80% 50%, rgba(255,111,0,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(57,73,171,0.4) 0%, transparent 50%);
+    }
+    .header::after {
+      content: '';
+      position: absolute; bottom: -2px; left: 0; right: 0; height: 40px;
+      background: var(--bg);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    .header-inner {
+      max-width: 900px; margin: 0 auto;
+      padding: 28px 24px 48px;
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 18px;
+    }
+    .logo-wrap {
+      width: 56px; height: 56px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 900; color: #fff;
+      box-shadow: 0 4px 20px rgba(255,111,0,0.5);
+      letter-spacing: -1px;
+    }
+    .header-text h1 {
+      color: #fff; font-size: 22px; font-weight: 800; letter-spacing: -0.3px;
+    }
+    .header-text p {
+      color: rgba(255,255,255,0.65); font-size: 13px; margin-top: 3px; font-weight: 400;
+    }
+    .header-badge {
+      margin-left: auto; flex-shrink: 0;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50px;
+      padding: 6px 14px;
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.85);
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+
+    /* ══════════════════ STEPPER ══════════════════ */
+    .stepper-wrap {
+      max-width: 900px; margin: -20px auto 0;
+      padding: 0 16px; position: relative; z-index: 10;
+    }
+    .stepper {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 20px 24px;
+      display: flex; align-items: center; gap: 0;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .stepper::-webkit-scrollbar { display: none; }
+    .step-item {
+      display: flex; align-items: center; gap: 0;
+      flex: 1; min-width: 0;
+    }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      border: 2px solid var(--border);
+      background: var(--light); color: var(--muted);
+      flex-shrink: 0; transition: all 0.3s ease;
+      cursor: pointer; position: relative;
+    }
+    .step-circle.active {
+      background: linear-gradient(135deg, var(--p1), var(--p3));
+      border-color: var(--p1); color: #fff;
+      box-shadow: 0 4px 16px rgba(26,35,126,0.35);
+      transform: scale(1.1);
+    }
+    .step-circle.done {
+      background: linear-gradient(135deg, var(--g1), var(--g2));
+      border-color: var(--g1); color: #fff;
+    }
+    .step-circle.done::after {
+      content: '✓'; font-size: 14px; font-weight: 800;
+    }
+    .step-circle.done .step-num { display: none; }
+    .step-label {
+      font-size: 9.5px; font-weight: 600; color: var(--muted);
+      text-align: center; text-transform: uppercase;
+      letter-spacing: 0.3px; margin-top: 5px;
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; max-width: 70px;
+    }
+    .step-label.active { color: var(--p1); }
+    .step-label.done   { color: var(--g1); }
+    .step-col { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .step-line {
+      flex: 1; height: 2px;
+      background: var(--border);
+      margin: 0 4px; margin-bottom: 22px;
+      transition: background 0.4s ease;
+    }
+    .step-line.done { background: linear-gradient(90deg, var(--g1), var(--g2)); }
+
+    /* ══════════════════ CONTAINER ══════════════════ */
+    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+
+    /* ══════════════════ FORM PANELS ══════════════════ */
+    .form-panel { display: none; animation: slideIn 0.4s cubic-bezier(0.34,1.2,0.64,1) both; }
+    .form-panel.active { display: block; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideBack {
+      from { opacity: 0; transform: translateX(-30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .form-panel.back { animation: slideBack 0.4s cubic-bezier(0.34,1.2,0.64,1) both; }
+
+    .panel-header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 24px;
+    }
+    .panel-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--p1), var(--p3));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+      box-shadow: 0 6px 20px rgba(26,35,126,0.3);
+    }
+    .panel-title { font-size: 20px; font-weight: 800; color: var(--p1); letter-spacing: -0.3px; }
+    .panel-subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .panel-step-count {
+      margin-left: auto; flex-shrink: 0;
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      background: var(--light); border-radius: 50px;
+      padding: 5px 12px; border: 1px solid var(--border);
+    }
+
+    /* ══════════════════ CARD ══════════════════ */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    /* ══════════════════ GRID ══════════════════ */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+    .col-span { grid-column: 1 / -1; }
+
+    /* ══════════════════ FIELDS ══════════════════ */
+    .field { display: flex; flex-direction: column; gap: 7px; }
+
+    label {
+      font-size: 11.5px; font-weight: 700;
+      color: var(--p1); letter-spacing: 0.6px;
+      text-transform: uppercase; display: flex; align-items: center; gap: 5px;
+    }
+    label .req { color: var(--a1); font-size: 14px; line-height: 1; }
+    label .tip {
+      font-size: 10px; font-weight: 500; color: var(--muted);
+      background: var(--light); border-radius: 4px;
+      padding: 1px 6px; text-transform: none; letter-spacing: 0;
+    }
+
+    .input-wrap { position: relative; }
+input[type="text"], input[type="number"], input[type="tel"],
+    input[type="date"], select, textarea {
+      background: var(--light);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 14px; font-family: inherit;
+      color: var(--text); width: 100%;
+      transition: all 0.2s ease;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--p3);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(57,73,171,0.12);
+    }
+    input.error, select.error, textarea.error {
+      border-color: #ef5350;
+      box-shadow: 0 0 0 3px rgba(239,83,80,0.1);
+      background: #fff5f5;
+    }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+    select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237b8ab8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+    /* ══════════════════ PILLS / RADIO ══════════════════ */
+    .pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill input { display: none; }
+    .pill label {
+      padding: 8px 16px; border-radius: 50px;
+      border: 1.5px solid var(--border);
+      background: var(--light); color: var(--muted);
+      font-size: 13px; font-weight: 600;
+      text-transform: none; letter-spacing: 0;
+      cursor: pointer; transition: all 0.2s ease;
+      display: block; white-space: nowrap;
+    }
+    .pill label:hover { border-color: var(--p3); color: var(--p1); background: #eef0ff; }
+    .pill input:checked + label {
+      background: linear-gradient(135deg, var(--p1), var(--p3));
+      color: #fff; border-color: var(--p1);
+      box-shadow: 0 3px 12px rgba(26,35,126,0.3);
+    }
+    .pill.green input:checked + label {
+      background: linear-gradient(135deg, var(--g1), var(--g2));
+      border-color: var(--g1);
+      box-shadow: 0 3px 12px rgba(0,137,123,0.3);
+    }
+    .pill.orange input:checked + label {
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      border-color: var(--a1);
+      box-shadow: 0 3px 12px rgba(255,111,0,0.3);
+    }
+
+    /* ══════════════════ DIVIDER ══════════════════ */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 4px 0 8px; color: var(--muted);
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ══════════════════ ORDER SECTION ══════════════════ */
+    .order-reveal {
+      overflow: hidden; max-height: 0;
+      transition: max-height 0.5s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    .order-reveal.open { max-height: 600px; opacity: 1; }
+    .order-reveal-inner {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 2px dashed #bbf7d0;
+    }
+    .order-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, #e8f5e9, #f0fff4);
+      border: 1px solid #a5d6a7; border-radius: 8px;
+      padding: 7px 14px; margin-bottom: 14px;
+      font-size: 12px; font-weight: 700; color: #2e7d32;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* ══════════════════ NAV BUTTONS ══════════════════ */
+    .nav-bar {
+      display: flex; align-items: center; gap: 12px;
+      margin-top: 28px;
+    }
+    .btn-back {
+      padding: 13px 28px; border-radius: 50px;
+      border: 1.5px solid var(--border);
+      background: #fff; color: var(--muted);
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .btn-back:hover { border-color: var(--p3); color: var(--p1); }
+    .btn-next {
+      flex: 1; padding: 14px 32px; border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, var(--p1) 0%, var(--p3) 100%);
+      color: #fff; font-size: 15px; font-weight: 700; font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(26,35,126,0.35);
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(26,35,126,0.4); }
+    .btn-next:active { transform: translateY(0); }
+    .btn-submit-final {
+      flex: 1; padding: 14px 32px; border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, var(--a1) 0%, #e65100 100%);
+      color: #fff; font-size: 15px; font-weight: 700; font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(255,111,0,0.4);
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit-final:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,111,0,0.5); }
+    .btn-submit-final:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ══════════════════ PROGRESS BAR ══════════════════ */
+    .progress-strip {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 999;
+      background: rgba(255,255,255,0.2);
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--a3), var(--a1));
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 0 8px rgba(255,111,0,0.6);
+    }
+
+    /* ══════════════════ SUCCESS OVERLAY ══════════════════ */
+    #success-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(10,20,80,0.88);
+      backdrop-filter: blur(8px);
+      z-index: 500;
+      align-items: center; justify-content: center;
+    }
+    #success-overlay.show { display: flex; animation: fadeIn 0.35s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .success-card {
+      background: #fff; border-radius: 24px;
+      padding: 48px 40px; text-align: center;
+      max-width: 400px; width: 90%;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+      animation: popUp 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes popUp {
+      from { transform: scale(0.8); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .success-anim { font-size: 64px; margin-bottom: 8px; animation: bounce 0.6s 0.3s ease both; }
+    @keyframes bounce {
+      from { transform: scale(0); }
+      60%  { transform: scale(1.2); }
+      to   { transform: scale(1); }
+    }
+    .success-card h2 { font-size: 24px; font-weight: 800; color: var(--p1); margin-bottom: 8px; }
+    .success-card p  { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+    .btn-again {
+      background: linear-gradient(135deg, var(--p1), var(--p3));
+      color: #fff; border: none; border-radius: 50px;
+      padding: 13px 36px; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      box-shadow: 0 4px 16px rgba(26,35,126,0.35);
+    }
+
+    /* ══════════════════ TOAST ══════════════════ */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      padding: 13px 26px; border-radius: 50px;
+      font-size: 13.5px; font-weight: 600; color: #fff;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      z-index: 999; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      max-width: 88vw; text-align: center; white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
+    #toast.error   { background: linear-gradient(135deg, #b71c1c, #c62828); }
+
+    /* ══════════════════ SUMMARY CHIP ══════════════════ */
+    .info-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--light); border: 1px solid var(--border);
+      border-radius: 8px; padding: 7px 12px;
+      font-size: 12px; font-weight: 600; color: var(--p1);
+    }
+
+    /* ══════════════════ RESPONSIVE ══════════════════ */
+    @media (max-width: 640px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .panel-step-count { display: none; }
+      .header-badge { display: none; }
+      .stepper { padding: 16px 12px; gap: 0; }
+      .step-label { font-size: 8px; max-width: 50px; }
+      .step-circle { width: 30px; height: 30px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP PROGRESS STRIP -->
+<div class="progress-strip"><div class="progress-fill" id="topProgress" style="width:14%"></div></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- SUCCESS OVERLAY -->
+<div id="success-overlay">
+  <div class="success-card">
+    <div class="success-anim">🎉</div>
+    <h2>Report Submitted!</h2>
+    <p>Activity recorded successfully in the Nova Sales Register. Dashboard will update shortly.</p>
+    <button class="btn-again" onclick="resetAll()">+ Add Another Entry</button>
+  </div>
+</div>
+
+<!-- ══════ HEADER ══════ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-wrap">N</div>
+    <div class="header-text">
+      <h1>Nova Channel Sales</h1>
+      <p>Daily Field Activity Report</p>
+    </div>
+    <div class="header-badge" id="todayBadge"></div>
+  </div>
+</header>
+
+<!-- ══════ STEPPER ══════ -->
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step-item">
+      <div class="step-col">
+        <div class="step-circle active" id="sc1" onclick="goToStep(1)"><span class="step-num">1</span></div>
+        <div class="step-label active" id="sl1">Basics</div>
+      </div>
+      <div class="step-line" id="line1"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-col">
+        <div class="step-circle" id="sc2" onclick="goToStep(2)"><span class="step-num">2</span></div>
+        <div class="step-label" id="sl2">Party</div>
+      </div>
+      <div class="step-line" id="line2"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-col">
+        <div class="step-circle" id="sc3" onclick="goToStep(3)"><span class="step-num">3</span></div>
+        <div class="step-label" id="sl3">Discuss</div>
+      </div>
+      <div class="step-line" id="line3"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-col">
+        <div class="step-circle" id="sc4" onclick="goToStep(4)"><span class="step-num">4</span></div>
+        <div class="step-label" id="sl4">Business</div>
+      </div>
+      <div class="step-line" id="line4"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-col">
+        <div class="step-circle" id="sc5" onclick="goToStep(5)"><span class="step-num">5</span></div>
+        <div class="step-label" id="sl5">Stage</div>
+      </div>
+      <div class="step-line" id="line5"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-col">
+        <div class="step-circle" id="sc6" onclick="goToStep(6)"><span class="step-num">6</span></div>
+        <div class="step-label" id="sl6">Order</div>
+      </div>
+      <div class="step-line" id="line6"></div>
+    </div>
+    <div class="step-item">
+      <div class="step-col">
+        <div class="step-circle" id="sc7" onclick="goToStep(7)"><span class="step-num">7</span></div>
+        <div class="step-label" id="sl7">Extra</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ FORM ══════════════════ -->
+<div class="container">
+<form id="mainForm" novalidate>
+
+  <!-- ① BASIC INFO -->
+  <div class="form-panel active" id="panel1">
+    <div class="panel-header">
+      <div class="panel-icon">📋</div>
+      <div>
+        <div class="panel-title">Basic Information</div>
+        <div class="panel-subtitle">Who is reporting and how did you reach out?</div>
+      </div>
+      <div class="panel-step-count">Step 1 of 7</div>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field">
+          <label>Entry Date <span class="req">*</span></label>
+          <div class="input-wrap">            <input type="date" id="entryDate" required/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Executive Name <span class="req">*</span></label>
+          <div class="input-wrap">            <select id="executiveName" required>
+              <option value="">— Select Executive —</option>
+              <option>Bipul</option><option>Jatin</option><option>Sukanda</option>
+              <option>Harpreet</option><option>Pavitar</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Type of Contact <span class="req">*</span></label>
+          <div class="input-wrap">            <select id="contactType" required>
+              <option value="">— Select Type —</option>
+              <option>Builder</option><option>Architect</option><option>Interior Designer</option>
+              <option>Hardware Shop</option><option>Furniture Shop</option><option>Kitchen Dealer</option>
+              <option>Wardrobe Dealer</option><option>Real Estate Agent</option>
+              <option>Contractor</option><option>Plumber</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Interaction Type <span class="req">*</span></label>
+          <div class="input-wrap">            <select id="interactionType" required>
+              <option value="">— Select Type —</option>
+              <option>Cold Call</option><option>Follow-up Call</option><option>First Visit</option>
+              <option>Repeat Visit</option><option>Meeting</option><option>WhatsApp Sent</option>
+              <option>Catalogue Shared</option><option>Sample Shared</option>
+              <option>Price Discussion</option><option>Order Discussion</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Source Type <span class="req">*</span></label>
+          <div class="input-wrap">            <select id="sourceType" required>
+              <option value="">— Select Source —</option>
+              <option>Cold Call</option><option>Reference</option><option>Site Visit</option>
+              <option>Social Media</option><option>Exhibition</option><option>Dealer Network</option>
+              <option>Architect Reference</option><option>Online Inquiry</option>
+              <option>Walk-in</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Was Contact Successful? <span class="req">*</span></label>
+          <div class="input-wrap">            <select id="contactStatus" required>
+              <option value="">— Select —</option>
+              <option>Yes</option><option>No</option><option>Switched Off</option>
+              <option>Busy</option><option>No Response</option><option>Call Back Later</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button type="button" class="btn-next" onclick="nextStep(1)">Continue &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- ② PARTY DETAILS -->
+  <div class="form-panel" id="panel2">
+    <div class="panel-header">
+      <div class="panel-icon">🏢</div>
+      <div>
+        <div class="panel-title">Party / Firm Details</div>
+        <div class="panel-subtitle">Who did you meet or speak with?</div>
+      </div>
+      <div class="panel-step-count">Step 2 of 7</div>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field">
+          <label>Party / Firm Name <span class="req">*</span></label>
+          <div class="input-wrap">            <input type="text" id="firmName" placeholder="e.g. Mehta Interiors" required/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Contact Person <span class="req">*</span></label>
+          <div class="input-wrap">            <input type="text" id="contactPerson" placeholder="e.g. Ramesh Mehta" required/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Mobile Number <span class="req">*</span></label>
+          <div class="input-wrap">            <input type="tel" id="mobile" placeholder="10-digit number" maxlength="10" required/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Alternate Mobile <span class="tip">Optional</span></label>
+          <div class="input-wrap">            <input type="tel" id="altMobile" placeholder="Optional" maxlength="10"/>
+          </div>
+        </div>
+        <div class="field col-span">
+          <label>Full Address <span class="tip">Optional</span></label>
+          <textarea id="address" placeholder="Shop / Office / Site address..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button type="button" class="btn-back" onclick="prevStep(2)">← Back</button>
+      <button type="button" class="btn-next" onclick="nextStep(2)">Continue &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- ③ INTERACTION / DISCUSSION -->
+  <div class="form-panel" id="panel3">
+    <div class="panel-header">
+      <div class="panel-icon">💬</div>
+      <div>
+        <div class="panel-title">Discussion Details</div>
+        <div class="panel-subtitle">What was discussed during the interaction?</div>
+      </div>
+      <div class="panel-step-count">Step 3 of 7</div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label>Discussion Summary <span class="req">*</span></label>
+        <textarea id="discussionSummary" rows="5"
+          placeholder="Describe what was discussed — requirements, concerns, feedback, next steps..." required></textarea>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button type="button" class="btn-back" onclick="prevStep(3)">← Back</button>
+      <button type="button" class="btn-next" onclick="nextStep(3)">Continue &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- ④ BUSINESS POTENTIAL -->
+  <div class="form-panel" id="panel4">
+    <div class="panel-header">
+      <div class="panel-icon">💼</div>
+      <div>
+        <div class="panel-title">Business Potential</div>
+        <div class="panel-subtitle">What is the expected business value?</div>
+      </div>
+      <div class="panel-step-count">Step 4 of 7</div>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field">
+          <label>Interested In</label>
+          <div class="input-wrap">            <select id="interestedIn">
+              <option value="">— Select —</option>
+              <option>Modular Kitchen</option><option>Wardrobe</option>
+              <option>Both</option><option>Not Clear</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Potential Type</label>
+          <div class="input-wrap">            <select id="potentialType">
+              <option value="">— Select —</option>
+              <option>Self-use customer referral</option><option>Builder project</option>
+              <option>Retail resale</option><option>Outsourcing manufacturing</option>
+              <option>Dealer enquiry</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Expected Quantity</label>
+          <div class="input-wrap">            <input type="number" id="expectedQty" placeholder="e.g. 5" min="0"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Expected Order Value (₹)</label>
+          <div class="input-wrap">            <input type="number" id="expectedValue" placeholder="e.g. 500000" min="0"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Expected Order Date</label>
+          <div class="input-wrap">            <input type="date" id="expectedOrderDate"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Expected Billing Month</label>
+          <div class="input-wrap">            <select id="billingMonth">
+              <option value="">— Select Month —</option>
+              <option>Apr-2025</option><option>May-2025</option><option>Jun-2025</option>
+              <option>Jul-2025</option><option>Aug-2025</option><option>Sep-2025</option>
+              <option>Oct-2025</option><option>Nov-2025</option><option>Dec-2025</option>
+              <option>Jan-2026</option><option>Feb-2026</option><option>Mar-2026</option>
+              <option>Apr-2026</option><option>May-2026</option><option>Jun-2026</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Units Booked</label>
+          <div class="input-wrap">            <input type="number" id="unitsBooked" placeholder="e.g. 3" min="0"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button type="button" class="btn-back" onclick="prevStep(4)">← Back</button>
+      <button type="button" class="btn-next" onclick="nextStep(4)">Continue &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- ⑤ STAGE & FOLLOW-UP -->
+  <div class="form-panel" id="panel5">
+    <div class="panel-header">
+      <div class="panel-icon">🎯</div>
+      <div>
+        <div class="panel-title">Stage & Follow-Up</div>
+        <div class="panel-subtitle">Where is this lead in the pipeline?</div>
+      </div>
+      <div class="panel-step-count">Step 5 of 7</div>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field">
+          <label>Current Stage <span class="req">*</span></label>
+          <div class="input-wrap">            <select id="currentStage" required>
+              <option value="">— Select Stage —</option>
+              <option>New Lead</option><option>Contacted</option><option>Follow-up Due</option>
+              <option>Interested</option><option>Meeting Fixed</option><option>Negotiation</option>
+              <option>Waiting for Project Start</option><option>Quotation Sent</option>
+              <option>Samples Sent</option><option>Order Probability High</option><option>Lost</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Probability %</label>
+          <div class="input-wrap">            <select id="probability">
+              <option value="">— Select —</option>
+              <option>10%</option><option>25%</option><option>50%</option>
+              <option>75%</option><option>90%</option><option>100%</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Next Follow-up Date</label>
+          <div class="input-wrap">            <input type="date" id="nextFollowup"/>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:18px;">
+        <label style="margin-bottom:10px;display:block;">Follow-up Priority</label>
+        <div class="pill-group">
+          <div class="pill orange"><input type="radio" name="priority" id="p_high" value="High"/><label for="p_high">🔴 High</label></div>
+          <div class="pill"><input type="radio" name="priority" id="p_med" value="Medium"/><label for="p_med">🟡 Medium</label></div>
+          <div class="pill green"><input type="radio" name="priority" id="p_low" value="Low"/><label for="p_low">🟢 Low</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button type="button" class="btn-back" onclick="prevStep(5)">← Back</button>
+      <button type="button" class="btn-next" onclick="nextStep(5)">Continue &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- ⑥ ORDER STATUS -->
+  <div class="form-panel" id="panel6">
+    <div class="panel-header">
+      <div class="panel-icon">✅</div>
+      <div>
+        <div class="panel-title">Order Status</div>
+        <div class="panel-subtitle">Was an order confirmed in this meeting?</div>
+      </div>
+      <div class="panel-step-count">Step 6 of 7</div>
+    </div>
+    <div class="card">
+      <div class="field" style="margin-bottom:6px;">
+        <label>Order Booked?</label>
+        <div class="pill-group" style="margin-top:4px;">
+          <div class="pill green">
+            <input type="radio" name="orderBooked" id="ob_yes" value="Yes" onchange="toggleOrder(true)"/>
+            <label for="ob_yes">🎉 Yes — Order Confirmed!</label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="orderBooked" id="ob_no" value="No" onchange="toggleOrder(false)" checked/>
+            <label for="ob_no">⏳ Not Yet</label>
+          </div>
+        </div>
+      </div>
+      <div class="order-reveal" id="orderReveal">
+        <div class="order-reveal-inner">
+          <div class="order-badge">🎉 Fill Order Details</div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Order Booked Date</label>
+              <div class="input-wrap">                <input type="date" id="orderDate"/>
+              </div>
+            </div>
+            <div class="field">
+              <label>Booked Order Value (₹)</label>
+              <div class="input-wrap">                <input type="number" id="bookedValue" placeholder="e.g. 350000" min="0"/>
+              </div>
+            </div>
+            <div class="field">
+              <label>Product Booked</label>
+              <div class="input-wrap">                <select id="productBooked">
+                  <option value="">— Select —</option>
+                  <option>Modular Kitchen</option><option>Wardrobe</option><option>Both</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <button type="button" class="btn-back" onclick="prevStep(6)">← Back</button>
+      <button type="button" class="btn-next" onclick="nextStep(6)">Continue &nbsp;→</button>
+    </div>
+  </div>
+
+  <!-- ⑦ ADDITIONAL INFO -->
+  <div class="form-panel" id="panel7">
+    <div class="panel-header">
+      <div class="panel-icon">📝</div>
+      <div>
+        <div class="panel-title">Additional Information</div>
+        <div class="panel-subtitle">Any other useful details to capture?</div>
+      </div>
+      <div class="panel-step-count">Step 7 of 7</div>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field">
+          <label>Reason if Lost</label>
+          <div class="input-wrap">            <select id="lostReason">
+              <option value="">— Select if Lost —</option>
+              <option>Price high</option><option>Already working with vendor</option>
+              <option>No current requirement</option><option>Quality concern</option>
+              <option>Delay concern</option><option>Payment issue</option>
+              <option>Builder project delayed</option><option>No response</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Competitor Currently Used</label>
+          <div class="input-wrap">            <input type="text" id="competitor" placeholder="e.g. Sleek, Hettich, Local vendor"/>
+          </div>
+        </div>
+        <div class="field col-span">
+          <label>Payment Remarks</label>
+          <div class="input-wrap">            <input type="text" id="paymentRemarks" placeholder="e.g. 50% advance paid, balance on delivery"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINAL SUBMIT -->
+    <div class="nav-bar">
+      <button type="button" class="btn-back" onclick="prevStep(7)">← Back</button>
+      <button type="submit" class="btn-submit-final" id="submitBtn">
+        🚀 &nbsp;Submit Report
+      </button>
+    </div>
+  </div>
+
+</form>
+</div>
+
+<script>
+  // ─── CONFIG ───────────────────────────────────────────
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylRW88oswcKWrl0xrc0bOkjxIaFlDGn00PrZM399ucouj_2xSFZttYMFMiyOE-YaJDWw/exec";
+  // ──────────────────────────────────────────────────────
+
+  const TOTAL_STEPS = 7;
+  let currentStep = 1;
+
+  // Set today's date
+  const today = new Date();
+  document.getElementById('entryDate').valueAsDate = today;
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('todayBadge').textContent =
+    days[today.getDay()] + ', ' + today.getDate() + ' ' + months[today.getMonth()] + ' ' + today.getFullYear();
+
+  function updateStepper(step) {
+    for (let i = 1; i <= TOTAL_STEPS; i++) {
+      const sc = document.getElementById('sc' + i);
+      const sl = document.getElementById('sl' + i);
+      sc.className = 'step-circle';
+      sl.className = 'step-label';
+      if (i < step)       { sc.classList.add('done');   sl.classList.add('done'); }
+      else if (i === step){ sc.classList.add('active'); sl.classList.add('active'); }
+      if (i < TOTAL_STEPS) {
+        const line = document.getElementById('line' + i);
+        line.className = 'step-line' + (i < step ? ' done' : '');
+      }
+    }
+    document.getElementById('topProgress').style.width = ((step / TOTAL_STEPS) * 100) + '%';
+  }
+
+  function showPanel(step, dir = 'forward') {
+    document.querySelectorAll('.form-panel').forEach(p => {
+      p.classList.remove('active','back');
+    });
+    const panel = document.getElementById('panel' + step);
+    panel.classList.add('active');
+    if (dir === 'back') panel.classList.add('back');
+    updateStepper(step);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function getRequiredInPanel(panelId) {
+    return document.querySelectorAll('#' + panelId + ' [required]');
+  }
+
+  function validatePanel(step) {
+    const fields = getRequiredInPanel('panel' + step);
+    let ok = true;
+    fields.forEach(f => {
+      f.classList.remove('error');
+      if (!f.value.trim()) { f.classList.add('error'); ok = false; }
+    });
+    if (!ok) showToast('⚠️ Please fill all required fields', 'error');
+    return ok;
+  }
+
+  function nextStep(step) {
+    if (!validatePanel(step)) return;
+    currentStep = step + 1;
+    showPanel(currentStep, 'forward');
+  }
+
+  function prevStep(step) {
+    currentStep = step - 1;
+    showPanel(currentStep, 'back');
+  }
+
+  function goToStep(step) {
+    if (step < currentStep) { currentStep = step; showPanel(step, 'back'); }
+  }
+
+  function toggleOrder(show) {
+    const el = document.getElementById('orderReveal');
+    if (show) el.classList.add('open'); else el.classList.remove('open');
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'show ' + type;
+    setTimeout(() => { t.className = ''; }, 3500);
+  }
+
+  function collectData() {
+    const g = id => document.getElementById(id)?.value?.trim() || '';
+    const r = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
+    return {
+      'Timestamp': new Date().toISOString(),
+      'Entry Date': g('entryDate'),
+      'Executive Name': g('executiveName'),
+      'Type of Contact': g('contactType'),
+      'Party / Firm Name': g('firmName'),
+      'Contact Person Name': g('contactPerson'),
+      'Mobile Number': g('mobile'),
+      'Alternate Mobile': g('altMobile'),
+      'Location / Area': g('locationArea'),
+      'District': g('district'),
+      'Address': g('address'),
+      'Interaction Type': g('interactionType'),
+      'Was Contact Successful?': g('contactStatus'),
+      'Discussion Summary': g('discussionSummary'),
+      'Interested In': g('interestedIn'),
+      'Potential Type': g('potentialType'),
+      'Expected Quantity': g('expectedQty'),
+      'Expected Order Value': g('expectedValue'),
+      'Expected Order Date': g('expectedOrderDate'),
+      'Current Stage': g('currentStage'),
+      'Probability %': g('probability'),
+      'Order Booked?': r('orderBooked'),
+      'Order Booked Date': g('orderDate'),
+      'Booked Order Value': g('bookedValue'),
+      'Product Booked': g('productBooked'),
+      'Units Booked': g('unitsBooked'),
+      'Expected Billing Month': g('billingMonth'),
+      'Next Follow-up Date': g('nextFollowup'),
+      'Follow-up Priority': r('priority'),
+      'Reason if Lost': g('lostReason'),
+      'Competitor Currently Used': g('competitor'),
+      'Source Type': g('sourceType'),
+      'Payment Remarks': g('paymentRemarks')
+    };
+  }
+
+  function resetAll() {
+    document.getElementById('mainForm').reset();
+    document.getElementById('entryDate').valueAsDate = new Date();
+    document.getElementById('orderReveal').classList.remove('open');
+    document.getElementById('success-overlay').classList.remove('show');
+    document.querySelectorAll('.error').forEach(e => e.classList.remove('error'));
+    currentStep = 1; showPanel(1);
+  }
+
+  document.getElementById('mainForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!validatePanel(7)) return;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = '⏳ Submitting…';
+    const data = collectData();
+
+    if (APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+      await new Promise(r => setTimeout(r, 1200));
+      btn.disabled = false; btn.textContent = '🚀  Submit Report';
+      document.getElementById('success-overlay').classList.add('show');
+      return;
+    }
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      btn.disabled = false; btn.textContent = '🚀  Submit Report';
+      document.getElementById('success-overlay').classList.add('show');
+    } catch(err) {
+      btn.disabled = false; btn.textContent = '🚀  Submit Report';
+      showToast('❌ Submission failed. Check connection.', 'error');
+    }
+  });
+</script>
+</body>
+</html>
